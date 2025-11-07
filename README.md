@@ -29,3 +29,9 @@ MaterialTheme {
     ToastHost()   // 全局 Toast 层
 }
 ```
+
+!["info"](z-images/info.png)
+
+!["warn"](z-images/warn.png)
+
+!["error"](z-images/error.png)
