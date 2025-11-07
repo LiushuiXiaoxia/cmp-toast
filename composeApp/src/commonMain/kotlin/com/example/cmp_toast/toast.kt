@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-object ToastController {
+object ToastKit {
     private val _messages = MutableSharedFlow<ToastMessage>(extraBufferCapacity = 10)
     val messages = _messages.asSharedFlow()
 
@@ -80,7 +80,7 @@ fun ToastHost(modifier: Modifier = Modifier) {
     var currentMessage by remember { mutableStateOf<ToastMessage?>(null) }
 
     LaunchedEffect(Unit) {
-        ToastController.messages.collectLatest { msg ->
+        ToastKit.messages.collectLatest { msg ->
             currentMessage = msg
             delay(msg.durationMillis)
             currentMessage = null
