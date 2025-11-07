@@ -36,23 +36,36 @@ object ToastController {
     private val _messages = MutableSharedFlow<ToastMessage>(extraBufferCapacity = 10)
     val messages = _messages.asSharedFlow()
 
-    fun show(message: String, level: ToastLevel = ToastLevel.Info, durationMillis: Long = 2000L) {
-        _messages.tryEmit(ToastMessage(message, level, durationMillis))
+    fun show(
+        msg: String,
+        level: ToastLevel = ToastLevel.Info,
+        position: ToastPosition = ToastPosition.Center,
+        durationMillis: Long = 2000L
+    ) {
+        _messages.tryEmit(ToastMessage(msg, level, position, durationMillis))
     }
 
-    fun info(message: String) = show(message, ToastLevel.Info)
-    fun warning(message: String) = show(message, ToastLevel.Warning)
-    fun error(message: String) = show(message, ToastLevel.Error)
+    fun info(msg: String, position: ToastPosition = ToastPosition.Center) = show(msg, ToastLevel.Info, position)
+    fun warning(msg: String, position: ToastPosition = ToastPosition.Center) = show(msg, ToastLevel.Warning, position)
+    fun error(msg: String, position: ToastPosition = ToastPosition.Center) = show(msg, ToastLevel.Error, position)
 }
 
 enum class ToastLevel {
     Info, Warning, Error
 }
 
+
+enum class ToastPosition {
+    Top,
+    Center,
+    Bottom
+}
+
 data class ToastMessage(
-    val text: String,
+    val msg: String,
     val level: ToastLevel = ToastLevel.Info,
-    val durationMillis: Long = 2000L
+    val position: ToastPosition = ToastPosition.Bottom,
+    val durationMillis: Long = 2000L,
 )
 
 @Composable
@@ -63,10 +76,7 @@ private fun toastColor(level: ToastLevel): Color = when (level) {
 }
 
 @Composable
-fun ToastHost(
-    modifier: Modifier = Modifier,
-    durationMillis: Long = 2000L,
-) {
+fun ToastHost(modifier: Modifier = Modifier) {
     var currentMessage by remember { mutableStateOf<ToastMessage?>(null) }
 
     LaunchedEffect(Unit) {
@@ -76,9 +86,17 @@ fun ToastHost(
             currentMessage = null
         }
     }
+    val alignment = when (currentMessage?.position) {
+        ToastPosition.Top -> Alignment.TopCenter
+        ToastPosition.Center -> Alignment.Center
+        ToastPosition.Bottom -> Alignment.BottomCenter
+        else -> Alignment.Center
+    }
 
     Box(
-        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter
+        modifier = modifier.fillMaxSize()
+            .padding(top = 80.dp, bottom = 80.dp),
+        contentAlignment = alignment,
     ) {
         AnimatedVisibility(
             visible = currentMessage != null,
@@ -95,14 +113,14 @@ fun ToastText(msg: ToastMessage?) {
     msg ?: return
     Box(
         modifier = Modifier
-            .padding(bottom = 80.dp)
+            .padding(30.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(toastColor(msg.level))
             .padding(horizontal = 24.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = msg.text,
+            text = msg.msg,
             color = Color.White,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
