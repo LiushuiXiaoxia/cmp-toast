@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,10 +47,22 @@ fun MainScreen() {
 @Composable
 fun ShowDialog() {
     var showContent by remember { mutableStateOf(false) }
-    Button(onClick = {
-        showContent = !showContent
-    }) {
-        Text("Click me!")
+    val config = ToastKit.config.collectAsState()
+
+    Column {
+        Button(onClick = {
+            showContent = !showContent
+        }) {
+            Text("Click me!")
+        }
+
+        Text("Android Native Toast")
+        Checkbox(
+            checked = config.value.androidNativeToast,
+            onCheckedChange = {
+                ToastKit.setup(config.value.copy(androidNativeToast = it))
+            },
+        )
     }
 
     if (!showContent) {
