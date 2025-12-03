@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,15 +28,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+data class ToastConfig(
+    val androidNativeToast: Boolean = true,
+)
 
 object ToastKit {
     private val _messages = MutableSharedFlow<ToastMessage>(extraBufferCapacity = 10)
     val messages = _messages.asSharedFlow()
+
+    private val _config = MutableStateFlow(ToastConfig())
+    val config: StateFlow<ToastConfig> = _config
+
+    fun setup(config: ToastConfig) {
+        this._config.update { config }
+    }
 
     fun show(
         msg: String,
@@ -79,10 +96,17 @@ private fun toastColor(level: ToastLevel): Color = when (level) {
 @Composable
 fun ToastHost(modifier: Modifier = Modifier) {
     var currentMessage by remember { mutableStateOf<ToastMessage?>(null) }
+    val platform by remember { mutableStateOf(getPlatform()) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         ToastKit.messages.collectLatest { msg ->
             currentMessage = msg
+            if (platform.isAndroid && ToastKit.config.value.androidNativeToast) {
+                scope.launch(Dispatchers.Main) {
+                    platform.showToast(msg.msg, msg.durationMillis)
+                }
+            }
             delay(msg.durationMillis)
             currentMessage = null
         }
@@ -95,6 +119,8 @@ fun ToastHost(modifier: Modifier = Modifier) {
     }
 
     if (currentMessage == null) return
+    if (platform.isAndroid && ToastKit.config.value.androidNativeToast) return
+
     Dialog(
         onDismissRequest = {},
         properties = getPlatform().toastDialogProperties(),

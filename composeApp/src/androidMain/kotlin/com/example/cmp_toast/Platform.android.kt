@@ -1,6 +1,7 @@
 package com.example.cmp_toast
 
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.ui.window.DialogProperties
 
 class AndroidPlatform(
@@ -15,6 +16,11 @@ class AndroidPlatform(
             decorFitsSystemWindows = false,
             usePlatformDefaultWidth = false
         )
+    }
+
+    override fun showToast(message: String, durationMillis: Long) {
+        val d = if (durationMillis > 2000) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+        Toast.makeText(getAppContext(), message, d).show()
     }
 }
 

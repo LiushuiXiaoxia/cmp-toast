@@ -21,6 +21,10 @@ class IOSPlatform(
             dismissOnClickOutside = true
         )
     }
+
+    override fun showToast(message: String, durationMillis: Long) {
+
+    }
 }
 
 actual fun getPlatform(): Platform = IOSPlatform()

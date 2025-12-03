@@ -20,6 +20,9 @@ class JVMPlatform(
             dismissOnClickOutside = true
         )
     }
+
+    override fun showToast(message: String, durationMillis: Long) {
+    }
 }
 
 actual fun getPlatform(): Platform = JVMPlatform()

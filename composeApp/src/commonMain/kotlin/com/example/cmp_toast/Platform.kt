@@ -11,6 +11,8 @@ interface Platform {
     val name: String
 
     fun toastDialogProperties(): DialogProperties
+
+    fun showToast(message: String, durationMillis: Long)
 }
 
 expect fun getPlatform(): Platform
