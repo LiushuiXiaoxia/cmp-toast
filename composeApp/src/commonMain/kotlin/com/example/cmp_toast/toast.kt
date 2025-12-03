@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -93,17 +94,25 @@ fun ToastHost(modifier: Modifier = Modifier) {
         else -> Alignment.Center
     }
 
-    Box(
-        modifier = modifier.fillMaxSize()
-            .padding(top = 80.dp, bottom = 80.dp),
-        contentAlignment = alignment,
+    if (currentMessage == null) return
+    Dialog(
+        onDismissRequest = {},
+        properties = getPlatform().toastDialogProperties(),
     ) {
-        AnimatedVisibility(
-            visible = currentMessage != null,
-            enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
-            exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+        Box(
+            modifier = modifier.fillMaxSize()
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .padding(top = 80.dp, bottom = 80.dp),
+            contentAlignment = alignment,
         ) {
-            ToastText(msg = currentMessage)
+            AnimatedVisibility(
+                visible = currentMessage != null,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 })
+            ) {
+                ToastText(msg = currentMessage)
+            }
         }
     }
 }

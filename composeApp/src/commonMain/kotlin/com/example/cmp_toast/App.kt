@@ -1,7 +1,5 @@
 package com.example.cmp_toast
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import cmp_toast.composeapp.generated.resources.Res
-import cmp_toast.composeapp.generated.resources.compose_multiplatform
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.window.Dialog
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -35,8 +30,6 @@ fun App() {
 
 @Composable
 fun MainScreen() {
-    val scope = rememberCoroutineScope()
-    var showContent by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.primaryContainer)
@@ -44,25 +37,39 @@ fun MainScreen() {
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Button(onClick = {
-            showContent = !showContent
-        }) {
-            Text("Click me!")
-        }
-        AnimatedVisibility(showContent) {
-            val greeting = remember { Greeting().greet() }
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Image(painterResource(Res.drawable.compose_multiplatform), null)
-                Text("Compose: $greeting")
-            }
-        }
+        ShowDialog()
+        ToastScreen()
+    }
+}
 
-        Button(onClick = {
-            ToastKit.info("保存成功！")
-        }) {
+@Composable
+fun ShowDialog() {
+    var showContent by remember { mutableStateOf(false) }
+    Button(onClick = {
+        showContent = !showContent
+    }) {
+        Text("Click me!")
+    }
+
+    if (!showContent) {
+        return
+    }
+    Dialog(onDismissRequest = {
+        showContent = false
+    }) {
+        ToastScreen()
+    }
+}
+
+@Composable
+fun ToastScreen() {
+    Column(
+        modifier = Modifier
+            .safeContentPadding()
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Button(onClick = { ToastKit.info("保存成功！") }) {
             Text("显示 Info Toast")
         }
 
